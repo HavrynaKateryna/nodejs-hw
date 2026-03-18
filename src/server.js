@@ -5,42 +5,43 @@ import pino from 'pino-http';
 import 'dotenv/config';
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(pino());
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.use(
+  pino({
+    transport: {
+      target: 'pino-pretty',
+      options: { colorize: true },
+    },
+  }),
+);
 
 app.get('/notes', (req, res) => {
-  res.status(200).json({
-    message: 'Retrieved all notes',
-  });
+  res.status(200).json({ message: 'Retrieved all notes' });
 });
 
 app.get('/notes/:noteId', (req, res) => {
   const { noteId } = req.params;
-
-  res.status(200).json({
-    message: `Retrieved note with ID: ${noteId}`,
-  });
+  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
 });
 
-app.get('/test-error', () => {
-  throw new Error('Simulated server error');
+app.get('/test-error', (req, res, next) => {
+  next(new Error('Simulated server error'));
 });
 
+// middleware 404
 app.use((req, res) => {
-  res.status(404).json({
-    message: 'Route not found',
-  });
+  res.status(404).json({ message: 'Route not found' });
 });
 
+// middleware 500
 app.use((err, req, res, next) => {
-  res.status(500).json({
-    message: err.message,
-  });
+  res.status(500).json({ message: err.message });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
