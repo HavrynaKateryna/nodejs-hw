@@ -1,18 +1,19 @@
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import createHttpError from 'http-errors';
 import { Session } from '../models/session.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/time.js';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+//
+// 🔐 генерация токена
+//
+const generateToken = () => crypto.randomBytes(30).toString('hex');
 
-// 🔑 создание сессии
+//
+// 🟢 CREATE SESSION
+//
 export const createSession = async (userId) => {
-  const accessToken = jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: '15m',
-  });
-
-  const refreshToken = jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: '1d',
-  });
+  const accessToken = generateToken();
+  const refreshToken = generateToken();
 
   const session = await Session.create({
     userId,
@@ -25,7 +26,9 @@ export const createSession = async (userId) => {
   return session;
 };
 
-// 🍪 установка cookies
+//
+// 🍪 SET COOKIES
+//
 export const setSessionCookies = (res, session) => {
   res.cookie('accessToken', session.accessToken, {
     httpOnly: true,
@@ -41,7 +44,7 @@ export const setSessionCookies = (res, session) => {
     maxAge: ONE_DAY,
   });
 
-  res.cookie('sessionId', session._id.toString(), {
+  res.cookie('sessionId', session._id, {
     httpOnly: true,
     secure: true,
     sameSite: 'none',

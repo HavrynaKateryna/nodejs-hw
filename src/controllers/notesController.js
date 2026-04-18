@@ -2,7 +2,7 @@ import { Note } from '../models/note.js';
 import createHttpError from 'http-errors';
 
 //
-// ➕ CREATE NOTE (привязка к user)
+// ➕ CREATE NOTE
 //
 export const createNote = async (req, res) => {
   const userId = req.user._id;
@@ -16,7 +16,7 @@ export const createNote = async (req, res) => {
 };
 
 //
-// 🔍 GET ALL NOTES (ТОЛЬКО СВОИ)
+// 🔍 GET ALL NOTES
 //
 export const getAllNotes = async (req, res) => {
   const userId = req.user._id;
@@ -52,7 +52,7 @@ export const getAllNotes = async (req, res) => {
 };
 
 //
-// 🔍 GET NOTE BY ID (ТОЛЬКО СВОЯ)
+// 🔍 GET BY ID
 //
 export const getNoteById = async (req, res) => {
   const userId = req.user._id;
@@ -70,7 +70,7 @@ export const getNoteById = async (req, res) => {
 };
 
 //
-// ✏️ UPDATE NOTE (ТОЛЬКО СВОЯ)
+// ✏️ UPDATE NOTE (FIXED MONGOOSE 9)
 //
 export const updateNote = async (req, res) => {
   const userId = req.user._id;
@@ -81,7 +81,9 @@ export const updateNote = async (req, res) => {
       userId,
     },
     req.body,
-    { new: true }
+    {
+      returnDocument: 'after',
+    }
   );
 
   if (!note) {
@@ -92,7 +94,7 @@ export const updateNote = async (req, res) => {
 };
 
 //
-// ❌ DELETE NOTE (ТОЛЬКО СВОЯ)
+// ❌ DELETE NOTE
 //
 export const deleteNote = async (req, res) => {
   const userId = req.user._id;

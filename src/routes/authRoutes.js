@@ -13,8 +13,6 @@ import {
   loginUserSchema,
 } from '../validations/authValidation.js';
 
-import { authenticate } from '../middleware/authenticate.js';
-
 const router = Router();
 
 //
@@ -32,13 +30,13 @@ router.post(
 router.post('/auth/login', celebrate({ body: loginUserSchema }), loginUser);
 
 //
-// 🔵 REFRESH SESSION (cookies only)
+// 🔵 REFRESH
 //
 router.post('/auth/refresh', refreshUserSession);
 
 //
-// 🔴 LOGOUT
+// 🔴 LOGOUT (БЕЗ authenticate ❗)
 //
-router.post('/auth/logout', authenticate, logoutUser);
+router.post('/auth/logout', logoutUser);
 
 export default router;

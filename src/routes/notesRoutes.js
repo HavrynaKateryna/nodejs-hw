@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { celebrate } from 'celebrate';
 
 import {
   getAllNotes,
@@ -9,6 +8,8 @@ import {
   updateNote,
 } from '../controllers/notesController.js';
 
+import { authenticate } from '../middleware/authenticate.js';
+
 import {
   getAllNotesSchema,
   noteIdSchema,
@@ -16,21 +17,49 @@ import {
   updateNoteSchema,
 } from '../validations/notesValidation.js';
 
+import { celebrate } from 'celebrate';
+
 const router = Router();
 
-// 🔍 GET all notes (pagination + search + tag validation)
-router.get('/notes', celebrate(getAllNotesSchema), getAllNotes);
+//
+// 🔐 ВСЕ NOTES ПОД ЗАЩИТОЙ
+//
+router.use(authenticate);
 
-// 🔍 GET by id
-router.get('/notes/:noteId', celebrate(noteIdSchema), getNoteById);
+//
+// 📄 GET ALL
+//
+router.get('/notes', celebrate({ query: getAllNotesSchema }), getAllNotes);
 
+//
+// 📄 GET BY ID
+//
+router.get('/notes/:noteId', celebrate({ params: noteIdSchema }), getNoteById);
+
+//
 // ➕ CREATE
-router.post('/notes', celebrate(createNoteSchema), createNote);
+//
+router.post('/notes', celebrate({ body: createNoteSchema }), createNote);
 
+//
 // ✏️ UPDATE
-router.patch('/notes/:noteId', celebrate(updateNoteSchema), updateNote);
+//
+router.patch(
+  '/notes/:noteId',
+  celebrate({
+    params: noteIdSchema,
+    body: updateNoteSchema,
+  }),
+  updateNote
+);
 
+//
 // ❌ DELETE
-router.delete('/notes/:noteId', celebrate(noteIdSchema), deleteNote);
+//
+router.delete(
+  '/notes/:noteId',
+  celebrate({ params: noteIdSchema }),
+  deleteNote
+);
 
 export default router;
