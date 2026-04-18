@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { errors } from 'celebrate';
 
 import { connectMongoDB } from './db/connectMongoDB.js';
 
@@ -36,17 +37,22 @@ app.use(authRoutes);
 app.use(notesRoutes);
 
 //
+// 🚨 CELEBRATE ERRORS (ВАЖНО ❗)
+//
+app.use(errors());
+
+//
 // ❌ 404
 //
 app.use(notFoundHandler);
 
 //
-// ⚠️ ERROR HANDLER
+// ⚠️ GLOBAL ERROR HANDLER
 //
 app.use(errorHandler);
 
 //
-// 🚀 START SERVER
+// 🚀 START
 //
 const PORT = process.env.PORT || 3000;
 
