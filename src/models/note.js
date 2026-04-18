@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const noteSchema = new mongoose.Schema(
   {
@@ -9,32 +9,32 @@ const noteSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      default: "",
+      default: '',
       trim: true,
     },
     tag: {
       type: String,
       enum: [
-        "Work",
-        "Personal",
-        "Meeting",
-        "Shopping",
-        "Ideas",
-        "Travel",
-        "Finance",
-        "Health",
-        "Important",
-        "Todo",
+        'Work',
+        'Personal',
+        'Meeting',
+        'Shopping',
+        'Ideas',
+        'Travel',
+        'Finance',
+        'Health',
+        'Important',
+        'Todo',
       ],
-      default: "Todo",
+      default: 'Todo',
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export const Note = mongoose.model(
-  "Note",
-  noteSchema,
-);
+// 🔥 ДОБАВЛЯЕМ ТЕКСТОВЫЙ ИНДЕКС (ОБЯЗАТЕЛЬНО ДЛЯ SEARCH)
+noteSchema.index({ title: 'text', content: 'text' });
+
+export const Note = mongoose.model('Note', noteSchema);

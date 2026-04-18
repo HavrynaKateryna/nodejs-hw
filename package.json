@@ -5,18 +5,19 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "celebrate": "^15.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "http-errors": "^2.0.1",
     "mongoose": "^9.3.3",
     "pino-http": "^11.0.0",
-    "pino-pretty": "^10.0.0"
+    "pino-pretty": "^10.3.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
-    "eslint": "^9.0.0",
     "@eslint/js": "^9.0.0",
-    "globals": "^15.0.0"
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "nodemon": "^3.1.14"
   }
 }
