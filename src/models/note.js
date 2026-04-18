@@ -11,15 +11,22 @@ const noteSchema = new mongoose.Schema(
 
     content: {
       type: String,
-      required: false, // 🔥 ОБЯЗАТЕЛЬНО ПО ПРОВЕРКЕ
+      required: false,
       default: '',
       trim: true,
     },
 
     tag: {
       type: String,
-      enum: TAGS, // 🔥 БЕРЁМ ИЗ КОНСТАНТЫ
+      enum: TAGS,
       default: 'Todo',
+    },
+
+    // 🔥 ОБЯЗАТЕЛЬНО ДЛЯ ПРИВАТНЫХ НОТОК
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
   },
   {
@@ -27,7 +34,7 @@ const noteSchema = new mongoose.Schema(
   }
 );
 
-// 🔥 текстовый индекс для поиска
+// 🔥 текстовый поиск
 noteSchema.index({ title: 'text', content: 'text' });
 
 export const Note = mongoose.model('Note', noteSchema);

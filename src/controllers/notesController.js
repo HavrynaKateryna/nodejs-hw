@@ -1,17 +1,34 @@
 import { Note } from '../models/note.js';
 import createHttpError from 'http-errors';
 
+//
+// ➕ CREATE NOTE (привязка к user)
+//
+export const createNote = async (req, res) => {
+  const userId = req.user._id;
+
+  const newNote = await Note.create({
+    ...req.body,
+    userId,
+  });
+
+  res.status(201).json(newNote);
+};
+
+//
+// 🔍 GET ALL NOTES (ТОЛЬКО СВОИ)
+//
 export const getAllNotes = async (req, res) => {
+  const userId = req.user._id;
+
   const { page = 1, perPage = 10, tag, search } = req.query;
 
-  const filter = {};
+  const filter = { userId };
 
-  // 🔍 фильтр по тегу
   if (tag) {
     filter.tag = tag;
   }
 
-  // 🔍 текстовый поиск
   if (search) {
     filter.$text = { $search: search };
   }
@@ -34,8 +51,16 @@ export const getAllNotes = async (req, res) => {
   });
 };
 
+//
+// 🔍 GET NOTE BY ID (ТОЛЬКО СВОЯ)
+//
 export const getNoteById = async (req, res) => {
-  const note = await Note.findById(req.params.noteId);
+  const userId = req.user._id;
+
+  const note = await Note.findOne({
+    _id: req.params.noteId,
+    userId,
+  });
 
   if (!note) {
     throw createHttpError(404, 'Note not found');
@@ -44,24 +69,37 @@ export const getNoteById = async (req, res) => {
   res.status(200).json(note);
 };
 
-export const createNote = async (req, res) => {
-  const newNote = await Note.create(req.body);
-  res.status(201).json(newNote);
-};
-
-export const deleteNote = async (req, res) => {
-  const note = await Note.findByIdAndDelete(req.params.noteId);
-
-  if (!note) {
-    throw createHttpError(404, 'Note not found');
-  }
-
-  res.status(200).json(note);
-};
-
+//
+// ✏️ UPDATE NOTE (ТОЛЬКО СВОЯ)
+//
 export const updateNote = async (req, res) => {
-  const note = await Note.findByIdAndUpdate(req.params.noteId, req.body, {
-    returnDocument: 'after',
+  const userId = req.user._id;
+
+  const note = await Note.findOneAndUpdate(
+    {
+      _id: req.params.noteId,
+      userId,
+    },
+    req.body,
+    { new: true }
+  );
+
+  if (!note) {
+    throw createHttpError(404, 'Note not found');
+  }
+
+  res.status(200).json(note);
+};
+
+//
+// ❌ DELETE NOTE (ТОЛЬКО СВОЯ)
+//
+export const deleteNote = async (req, res) => {
+  const userId = req.user._id;
+
+  const note = await Note.findOneAndDelete({
+    _id: req.params.noteId,
+    userId,
   });
 
   if (!note) {
