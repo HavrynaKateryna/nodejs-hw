@@ -1,10 +1,12 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { errors } from 'celebrate';
+import cookieParser from 'cookie-parser';
 
 import { connectMongoDB } from './db/connectMongoDB.js';
+
 import notesRoutes from './routes/notesRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 import { logger } from './middleware/logger.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
@@ -14,26 +16,38 @@ dotenv.config();
 
 const app = express();
 
-// 🔌 MongoDB connection
+//
+// 🔌 DB
+//
 await connectMongoDB();
 
-// 🧩 Middleware
+//
+// 🧩 MIDDLEWARE
+//
 app.use(logger);
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
-// 🛣 Routes
+//
+// 🛣 ROUTES
+//
+app.use(authRoutes);
 app.use(notesRoutes);
 
+//
 // ❌ 404
+//
 app.use(notFoundHandler);
 
-// ⚠️ Celebrate validation errors (ОБЯЗАТЕЛЬНО ПО ЗАДАНИЮ)
-app.use(errors());
-
-// ⚠️ Global error handler
+//
+// ⚠️ ERROR HANDLER
+//
 app.use(errorHandler);
 
+//
+// 🚀 START SERVER
+//
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
