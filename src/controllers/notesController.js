@@ -33,14 +33,14 @@ export const getAllNotes = async (req, res) => {
     filter.$text = { $search: search };
   }
 
-  const skip = (page - 1) * perPage;
+  const skip = (Number(page) - 1) * Number(perPage);
 
   const [notes, totalNotes] = await Promise.all([
-    Note.find(filter).skip(skip).limit(perPage),
+    Note.find(filter).skip(skip).limit(Number(perPage)),
     Note.countDocuments(filter),
   ]);
 
-  const totalPages = Math.ceil(totalNotes / perPage);
+  const totalPages = Math.ceil(totalNotes / Number(perPage));
 
   res.status(200).json({
     page: Number(page),
@@ -70,7 +70,7 @@ export const getNoteById = async (req, res) => {
 };
 
 //
-// ✏️ UPDATE NOTE (FIXED MONGOOSE 9)
+// ✏️ UPDATE NOTE
 //
 export const updateNote = async (req, res) => {
   const userId = req.user._id;
@@ -82,7 +82,8 @@ export const updateNote = async (req, res) => {
     },
     req.body,
     {
-      returnDocument: 'after',
+      new: true,
+      runValidators: true,
     }
   );
 

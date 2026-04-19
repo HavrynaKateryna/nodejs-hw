@@ -7,16 +7,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
     email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
     },
+
     password: {
       type: String,
       required: true,
       minlength: 8,
+      select: false,
     },
   },
   {
@@ -25,7 +28,7 @@ const userSchema = new mongoose.Schema(
 );
 
 //
-// 🔐 автоматически username = email
+// 🔐 username = email (fallback)
 //
 userSchema.pre('save', function (next) {
   if (!this.username) {
@@ -35,7 +38,19 @@ userSchema.pre('save', function (next) {
 });
 
 //
-// 🚫 убрать пароль из ответа API
+// 🔐 hash password before save (IMPORTANT FIX)
+//
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+
+//
+// 🚫 убрать пароль из JSON ответа
 //
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
@@ -44,7 +59,7 @@ userSchema.methods.toJSON = function () {
 };
 
 //
-// 🔑 сравнение пароля (для login)
+// 🔑 сравнение пароля
 //
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compare(password, this.password);

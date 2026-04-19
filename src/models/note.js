@@ -11,7 +11,6 @@ const noteSchema = new mongoose.Schema(
 
     content: {
       type: String,
-      required: false,
       default: '',
       trim: true,
     },
@@ -22,11 +21,11 @@ const noteSchema = new mongoose.Schema(
       default: 'Todo',
     },
 
-    // 🔥 ОБЯЗАТЕЛЬНО ДЛЯ ПРИВАТНЫХ НОТОК
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      index: true,
     },
   },
   {
@@ -34,7 +33,6 @@ const noteSchema = new mongoose.Schema(
   }
 );
 
-// 🔥 текстовый поиск
 noteSchema.index({ title: 'text', content: 'text' });
 
 export const Note = mongoose.model('Note', noteSchema);

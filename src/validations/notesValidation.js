@@ -9,7 +9,9 @@ const isValidObjectId = (value, helpers) => {
   return value;
 };
 
+//
 // 🔹 GET /notes
+//
 export const getAllNotesSchema = {
   query: Joi.object({
     page: Joi.number().integer().min(1).default(1),
@@ -19,30 +21,39 @@ export const getAllNotesSchema = {
   }),
 };
 
+//
 // 🔹 noteId
+//
 export const noteIdSchema = {
   params: Joi.object({
     noteId: Joi.string().custom(isValidObjectId).required(),
   }),
 };
 
-// 🔹 POST
+//
+// 🔹 CREATE NOTE
+//
 export const createNoteSchema = {
   body: Joi.object({
     title: Joi.string().min(1).required(),
-    content: Joi.string().allow(''),
-    tag: Joi.string().valid(...TAGS),
+    content: Joi.string().allow('').optional(),
+    tag: Joi.string()
+      .valid(...TAGS)
+      .default('Todo'),
   }),
 };
 
-// 🔹 PATCH
+//
+// 🔹 UPDATE NOTE
+//
 export const updateNoteSchema = {
   params: Joi.object({
     noteId: Joi.string().custom(isValidObjectId).required(),
   }),
+
   body: Joi.object({
     title: Joi.string().min(1),
-    content: Joi.string().allow(''),
+    content: Joi.string().allow('').optional(),
     tag: Joi.string().valid(...TAGS),
-  }).min(1), // 🔥 не пустий body
+  }).min(1),
 };

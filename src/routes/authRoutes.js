@@ -6,11 +6,15 @@ import {
   loginUser,
   refreshUserSession,
   logoutUser,
+  requestResetEmail,
+  resetPassword,
 } from '../controllers/authController.js';
 
 import {
   registerUserSchema,
   loginUserSchema,
+  requestResetEmailSchema,
+  resetPasswordSchema,
 } from '../validations/authValidation.js';
 
 const router = Router();
@@ -18,25 +22,39 @@ const router = Router();
 //
 // 🟢 REGISTER
 //
-router.post(
-  '/auth/register',
-  celebrate({ body: registerUserSchema }),
-  registerUser
-);
+router.post('/register', celebrate({ body: registerUserSchema }), registerUser);
 
 //
 // 🟡 LOGIN
 //
-router.post('/auth/login', celebrate({ body: loginUserSchema }), loginUser);
+router.post('/login', celebrate({ body: loginUserSchema }), loginUser);
 
 //
 // 🔵 REFRESH
 //
-router.post('/auth/refresh', refreshUserSession);
+router.post('/refresh', refreshUserSession);
 
 //
-// 🔴 LOGOUT (БЕЗ authenticate ❗)
+// 🔴 LOGOUT
 //
-router.post('/auth/logout', logoutUser);
+router.post('/logout', logoutUser);
+
+//
+// 📧 REQUEST RESET EMAIL
+//
+router.post(
+  '/request-reset-email',
+  celebrate({ body: requestResetEmailSchema }),
+  requestResetEmail
+);
+
+//
+// 🔑 RESET PASSWORD
+//
+router.post(
+  '/reset-password',
+  celebrate({ body: resetPasswordSchema }),
+  resetPassword
+);
 
 export default router;

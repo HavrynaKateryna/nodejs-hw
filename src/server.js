@@ -26,18 +26,23 @@ await connectMongoDB();
 // 🧩 MIDDLEWARE
 //
 app.use(logger);
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_DOMAIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 //
 // 🛣 ROUTES
 //
-app.use(authRoutes);
-app.use(notesRoutes);
+app.use('/auth', authRoutes);
+app.use('/notes', notesRoutes);
 
 //
-// 🚨 CELEBRATE ERRORS (ВАЖНО ❗)
+// 🚨 CELEBRATE ERRORS
 //
 app.use(errors());
 

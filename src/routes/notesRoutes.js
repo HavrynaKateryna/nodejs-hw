@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { celebrate } from 'celebrate';
 
 import {
   getAllNotes,
@@ -17,35 +18,33 @@ import {
   updateNoteSchema,
 } from '../validations/notesValidation.js';
 
-import { celebrate } from 'celebrate';
-
 const router = Router();
 
 //
-// 🔐 ВСЕ NOTES ПОД ЗАЩИТОЙ
+// 🔐 AUTH MIDDLEWARE
 //
 router.use(authenticate);
 
 //
-// 📄 GET ALL
+// 📄 GET ALL NOTES
 //
-router.get('/notes', celebrate({ query: getAllNotesSchema }), getAllNotes);
+router.get('/', celebrate({ query: getAllNotesSchema }), getAllNotes);
 
 //
-// 📄 GET BY ID
+// 📄 GET NOTE BY ID
 //
-router.get('/notes/:noteId', celebrate({ params: noteIdSchema }), getNoteById);
+router.get('/:noteId', celebrate({ params: noteIdSchema }), getNoteById);
 
 //
-// ➕ CREATE
+// ➕ CREATE NOTE
 //
-router.post('/notes', celebrate({ body: createNoteSchema }), createNote);
+router.post('/', celebrate({ body: createNoteSchema }), createNote);
 
 //
-// ✏️ UPDATE
+// ✏️ UPDATE NOTE
 //
 router.patch(
-  '/notes/:noteId',
+  '/:noteId',
   celebrate({
     params: noteIdSchema,
     body: updateNoteSchema,
@@ -54,12 +53,8 @@ router.patch(
 );
 
 //
-// ❌ DELETE
+// ❌ DELETE NOTE
 //
-router.delete(
-  '/notes/:noteId',
-  celebrate({ params: noteIdSchema }),
-  deleteNote
-);
+router.delete('/:noteId', celebrate({ params: noteIdSchema }), deleteNote);
 
 export default router;

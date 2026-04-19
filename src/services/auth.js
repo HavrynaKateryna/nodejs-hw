@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import createHttpError from 'http-errors';
 import { Session } from '../models/session.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/time.js';
 
@@ -30,24 +29,26 @@ export const createSession = async (userId) => {
 // 🍪 SET COOKIES
 //
 export const setSessionCookies = (res, session) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.cookie('accessToken', session.accessToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: FIFTEEN_MINUTES,
   });
 
   res.cookie('refreshToken', session.refreshToken, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: ONE_DAY,
   });
 
-  res.cookie('sessionId', session._id, {
+  res.cookie('sessionId', session._id.toString(), {
     httpOnly: true,
-    secure: true,
-    sameSite: 'none',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge: ONE_DAY,
   });
 };
