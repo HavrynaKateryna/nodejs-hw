@@ -5,8 +5,9 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "celebrate": "^15.0.3",
+    "bcrypt": "^6.0.0",
+    "celebrate": "^12.1.2",
+    "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
