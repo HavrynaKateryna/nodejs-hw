@@ -8,6 +8,7 @@ import { connectMongoDB } from './db/connectMongoDB.js';
 
 import notesRoutes from './routes/notesRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 import { logger } from './middleware/logger.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
@@ -26,12 +27,14 @@ await connectMongoDB();
 // 🧩 MIDDLEWARE
 //
 app.use(logger);
+
 app.use(
   cors({
     origin: process.env.FRONTEND_DOMAIN,
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -40,6 +43,7 @@ app.use(cookieParser());
 //
 app.use('/auth', authRoutes);
 app.use('/notes', notesRoutes);
+app.use('/users', userRoutes);
 
 //
 // 🚨 CELEBRATE ERRORS

@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
+const DEFAULT_AVATAR =
+  'https://ac.goit.global/fullstack/react/default-avatar.jpg';
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -21,6 +24,11 @@ const userSchema = new mongoose.Schema(
       minlength: 8,
       select: false,
     },
+
+    avatar: {
+      type: String,
+      default: DEFAULT_AVATAR,
+    },
   },
   {
     timestamps: true,
@@ -28,7 +36,7 @@ const userSchema = new mongoose.Schema(
 );
 
 //
-// 🔐 username = email (fallback)
+// 🔐 username = email
 //
 userSchema.pre('save', function (next) {
   if (!this.username) {
@@ -38,19 +46,7 @@ userSchema.pre('save', function (next) {
 });
 
 //
-// 🔐 hash password before save (IMPORTANT FIX)
-//
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-//
-// 🚫 убрать пароль из JSON ответа
+// 🚫 remove password from responses
 //
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
@@ -59,7 +55,7 @@ userSchema.methods.toJSON = function () {
 };
 
 //
-// 🔑 сравнение пароля
+// 🔑 compare password
 //
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compare(password, this.password);
