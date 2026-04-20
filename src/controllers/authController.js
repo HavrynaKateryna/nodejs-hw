@@ -40,7 +40,7 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select('+password');
 
   if (!user) {
     throw createHttpError(401, 'Invalid credentials');
@@ -109,77 +109,94 @@ export const logoutUser = async (req, res) => {
 //
 // 📧 REQUEST RESET EMAIL
 //
-export const requestResetEmail = async (req, res) => {
+export const requestResetEmail = async (req, res, next) => {
   const { email } = req.body;
 
-  const user = await User.findOne({ email });
+  try {
+    const user = await User.findOne({ email });
 
-  if (!user) {
+    if (!user) {
+      return res.status(200).json({
+        message: 'Password reset email sent successfully',
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        sub: user._id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    const template = await fs.readFile(
+      'src/templates/reset-password-email.html',
+      'utf-8'
+    );
+
+    const html = handlebars.compile(template)({
+      name: user.username || user.email,
+      link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`,
+    });
+
+    try {
+      await sendEmail({
+        from: process.env.SMTP_FROM,
+        to: email,
+        subject: 'Reset your password',
+        html,
+      });
+    } catch (error) {
+      return next(
+        createHttpError(
+          500,
+          'Failed to send the email, please try again later.'
+        )
+      );
+    }
+
     return res.status(200).json({
       message: 'Password reset email sent successfully',
     });
+  } catch (err) {
+    next(err);
   }
-
-  const token = jwt.sign(
-    {
-      sub: user._id,
-      email: user.email,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '15m' }
-  );
-
-  const template = await fs.readFile(
-    'src/templates/reset-password-email.html',
-    'utf-8'
-  );
-
-  const html = handlebars.compile(template)({
-    name: user.username || user.email,
-    link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`,
-  });
-
-  await sendEmail({
-    from: process.env.SMTP_FROM,
-    to: email,
-    subject: 'Reset your password',
-    html,
-  });
-
-  res.status(200).json({
-    message: 'Password reset email sent successfully',
-  });
 };
 
 //
 // 🔑 RESET PASSWORD
 //
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
   const { token, password } = req.body;
 
-  let decoded;
-
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    throw createHttpError(401, 'Invalid or expired token');
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+      throw createHttpError(401, 'Invalid or expired token');
+    }
+
+    const user = await User.findOne({
+      _id: decoded.sub,
+      email: decoded.email,
+    });
+
+    if (!user) {
+      throw createHttpError(404, 'User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    return res.status(200).json({
+      message: 'Password reset successfully',
+    });
+  } catch (err) {
+    next(err);
   }
-
-  const user = await User.findOne({
-    _id: decoded.sub,
-    email: decoded.email,
-  });
-
-  if (!user) {
-    throw createHttpError(404, 'User not found');
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  user.password = hashedPassword;
-  await user.save();
-
-  res.status(200).json({
-    message: 'Password reset successfully',
-  });
 };
